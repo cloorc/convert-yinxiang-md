@@ -119,10 +119,23 @@ public class Http {
         return objStrBuilder.toString();
     }
 
+    static long last = System.currentTimeMillis();
+    static void sleep() {
+        long offset = System.currentTimeMillis() - last;
+        if (offset < 5000) try {
+            Thread.sleep(offset);
+        } catch (InterruptedException e) {
+        } finally {
+            return;
+        }
+    }
+
     public static URLConnection connect (String target, RequestMethod method, Map<String,String> headers) {
         if (null == target) {
             return null;
         }
+
+        sleep();
 
         URL url = null;
         try {

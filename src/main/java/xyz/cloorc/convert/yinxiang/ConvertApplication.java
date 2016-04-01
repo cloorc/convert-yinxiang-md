@@ -8,6 +8,8 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.SimpleCommandLinePropertySource;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.util.StringUtils;
 import xyz.cloorc.convert.utils.Http;
 import xyz.cloorc.convert.utils.Json;
@@ -24,6 +26,7 @@ import java.util.*;
  * @author <a href="mailto:wittcnezh@foxmail.com"/>
  */
 @CommonsLog
+@EnableScheduling
 @SpringBootApplication
 public class ConvertApplication {
 
@@ -40,9 +43,10 @@ public class ConvertApplication {
 
         private String service;
         private final Map<String,String> queries = new HashMap<String, String>();
+        private SimpleCommandLinePropertySource source;
 
         public void run(String... args) throws Exception {
-            SimpleCommandLinePropertySource source = new SimpleCommandLinePropertySource(args);
+            source = new SimpleCommandLinePropertySource(args);
             if (! source.containsProperty("root"))
                 return;
 
@@ -94,13 +98,13 @@ public class ConvertApplication {
                     q.put("operateType", "listFiles");
                     q.put("parentPath", (String) get(folder,"key"));
                     q.put("pageSize", "26");
-                    convertFolders(target, Json.from(Http.get(service, null, q), ArrayList.class));
+                    convertFolders(target, Json.from(Http.getInputStream(service, null, q), ArrayList.class));
                 } else {
                     q.put("operateType", "getFile");
                     q.put("parentPath", (String) get(folder,"obj.parentPath"));
                     q.put("pageSize", "26");
                     q.put("guid", (String) get(folder,"obj.guid"));
-                    convertNote(target, Json.from(Http.get(service, null, q), Note.class));
+                    convertNote(target, Json.from(Http.getInputStream(service, null, q), Note.class));
                 }
             }
         }
